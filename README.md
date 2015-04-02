@@ -47,5 +47,5 @@ Install
 -------
 
 ```
-go get cloudfoundry-community/humanize-manifest
+go get github.com/cloudfoundry-community/humanize-manifest
 ```
