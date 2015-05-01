@@ -27,8 +27,8 @@ func currentBoshManifest() string {
 }
 
 func main() {
-	manifestPath := os.Args[0]
-	if manifestPath != "" {
+	manifestPath := os.Args[1]
+	if manifestPath == "" {
 		manifestPath = currentBoshManifest()
 	}
 
