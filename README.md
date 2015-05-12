@@ -20,7 +20,7 @@ humanize-manifest
 The output will vary based on the manifest, but here is an example from a bosh-lite CF manifest:
 
 ```
-$ humanize-spiff | head -n 20
+$ humanize-manifest | head -n 20
 meta:
   default_env:
     bosh:
