@@ -5,11 +5,19 @@ import (
 	"io/ioutil"
 	"os"
 
-	"launchpad.net/goyaml"
-
-	"github.com/cloudfoundry-community/gogobosh/local"
-	"github.com/cloudfoundry-community/gogobosh/models"
+	"gopkg.in/yaml.v2"
 )
+
+type Manifest struct {
+	Name         string    `yaml:"name"`
+	DirectorUUID string    `yaml:"director_uuid"`
+	Releases     []Release `yaml:"releases"`
+}
+
+type Release struct {
+	Name    string `yaml:"name"`
+	Version string `yaml:"version"`
+}
 
 func fatalIf(err error) {
 	if err != nil {
@@ -18,26 +26,18 @@ func fatalIf(err error) {
 	}
 }
 
-func currentBoshManifest() string {
-	configPath, err := local.DefaultBoshConfigPath()
-	fatalIf(err)
-	config, err := local.LoadBoshConfig(configPath)
-	fatalIf(err)
-	return config.CurrentDeploymentManifest()
-}
-
 func main() {
 	manifestPath := os.Args[1]
 	if manifestPath == "" {
-		manifestPath = currentBoshManifest()
+		os.Exit(2)
 	}
 
 	contents, err := ioutil.ReadFile(manifestPath)
 	fatalIf(err)
-	manifest := &models.DeploymentManifest{}
-	goyaml.Unmarshal(contents, manifest)
+	manifest := &Manifest{}
+	yaml.Unmarshal(contents, manifest)
 
-	str, err := goyaml.Marshal(*manifest)
+	str, err := yaml.Marshal(*manifest)
 	fatalIf(err)
 	fmt.Println(string(str))
 }
