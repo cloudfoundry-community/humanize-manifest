@@ -9,10 +9,7 @@ v1 is also supported, and `bosh create-env` (formely known as `bosh-init`)
 specificities are also supported.
 
 This also basically works for old v1 manifests created by `spiff` or `spruce`
-because v1 manifest schema is supported. But only BOSH schema is kept in
-output, so any `meta` YAML tree will be removed from output, which would be an
-issue with intermetidate manifests where the `meta` node was common practice
-and critical to later steps in the manifest build chain.
+because v1 schema is supported.
 
 
 Usage
@@ -119,4 +116,20 @@ Install
 
 ```
 go get github.com/cloudfoundry-community/humanize-manifest
+```
+
+
+Contributing
+------------
+
+If you modify this code, build it with:
+
+```
+go build
+```
+
+And then test it with the `-d` debug flag:
+
+```
+humanize-manifest -d machine-created-manifest.yml 2>&1 | less
 ```
