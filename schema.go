@@ -1,5 +1,6 @@
 package main
 
+// ...
 type Manifest struct {
 	Name           string              `yaml:"name,omitempty"` // Ref: https://bosh.io/docs/manifest-v2/#deployment
 	DirectorUUID   string              `yaml:"director_uuid,omitempty"`
@@ -22,25 +23,31 @@ type Manifest struct {
 
 // Ref: https://bosh.io/docs/manifest-v2/#instance-groups
 type InstanceGroup struct {
-	Name               string        `yaml:"name,omitempty"`
-	MigratedFrom       []string      `yaml:"migrated_from,omitempty"`
-	Instances          int           `yaml:"instances,omitempty"`
-	Lifecycle          string        `yaml:"lifecycle,omitempty"`
-	AZs                []string      `yaml:"azs,omitempty,flow"`
-	Jobs               []Job         `yaml:"jobs,omitempty"`
-	Templates          []Job         `yaml:"templates,omitempty"`  // deprecated v1 alias for 'jobs'
-	Properties         interface{}   `yaml:"properties,omitempty"` // v1. Deprecated in favor of job properties
-	Stemcell           string        `yaml:"stemcell,omitempty"`
-	VMType             string        `yaml:"vm_type,omitempty"`
-	ResourcePool       string        `yaml:"resource_pool,omitempty"` // v1 concept similar to 'vm_type'
-	VMExtensions       []interface{} `yaml:"vm_extensions,omitempty"`
-	VMResources        []interface{} `yaml:"vm_resources,omitempty"`
-	PersistentDisk     int           `yaml:"persistent_disk,omitempty"`
-	PersistentDiskType string        `yaml:"persistent_disk_type,omitempty"`
-	PersistentDiskPool string        `yaml:"persistent_disk_pool,omitempty"` // v1 concept similar to 'persistent_disk_type'
-	Env                interface{}   `yaml:"env,omitempty"`
-	Networks           []Network     `yaml:"networks,omitempty"`
-	Update             Update        `yaml:"update,omitempty"`
+	Name               string         `yaml:"name,omitempty"`
+	MigratedFrom       []MigratedFrom `yaml:"migrated_from,omitempty"`
+	Instances          int            `yaml:"instances,omitempty"`
+	Lifecycle          string         `yaml:"lifecycle,omitempty"`
+	AZs                []string       `yaml:"azs,omitempty,flow"`
+	Jobs               []Job          `yaml:"jobs,omitempty"`
+	Templates          []Job          `yaml:"templates,omitempty"`  // deprecated v1 alias for 'jobs'
+	Properties         interface{}    `yaml:"properties,omitempty"` // v1. Deprecated in favor of job properties
+	Stemcell           string         `yaml:"stemcell,omitempty"`
+	VMType             string         `yaml:"vm_type,omitempty"`
+	ResourcePool       string         `yaml:"resource_pool,omitempty"` // v1 concept similar to 'vm_type'
+	VMExtensions       []interface{}  `yaml:"vm_extensions,omitempty"`
+	VMResources        []interface{}  `yaml:"vm_resources,omitempty"`
+	PersistentDisk     int            `yaml:"persistent_disk,omitempty"`
+	PersistentDiskType string         `yaml:"persistent_disk_type,omitempty"`
+	PersistentDiskPool string         `yaml:"persistent_disk_pool,omitempty"` // v1 concept similar to 'persistent_disk_type'
+	Env                interface{}    `yaml:"env,omitempty"`
+	Networks           []Network      `yaml:"networks,omitempty"`
+	Update             Update         `yaml:"update,omitempty"`
+}
+
+// Ref: https://bosh.io/docs/migrated-from/#schema
+type MigratedFrom struct {
+	Name string `yaml:"name,omitempty"`
+	AZ   string `yaml:"azs,omitempty"`
 }
 
 type Job struct {
