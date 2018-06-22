@@ -1,6 +1,6 @@
 package main
 
-// ...
+// Manifest ...
 type Manifest struct {
 	Name           string              `yaml:"name,omitempty"` // Ref: https://bosh.io/docs/manifest-v2/#deployment
 	DirectorUUID   string              `yaml:"director_uuid,omitempty"`
@@ -11,16 +11,22 @@ type Manifest struct {
 	Update         Update              `yaml:"update,omitempty"`
 	Addons         []Addon             `yaml:"addons,omitempty"`
 	Properties     interface{}         `yaml:"properties,omitempty"`     // v1. Deprecated in favor of job properties
-	Networks       []NetworkDefinition `yaml:"networks,omitempty"`       // v1. Obsoleted by Cloud-Config, but useful for 'create-env'
-	ResourcePools  []VMProfile         `yaml:"resource_pools,omitempty"` // v1. Obsoleted by Cloud-Config, but useful for 'create-env'
-	DiskPools      []DiskProfile       `yaml:"disk_pools,omitempty"`     // v1. Obsoleted by Cloud-Config, but useful for 'create-env'
-	Compilation    CompilationConfig   `yaml:"compilation,omitempty"`    // v1. Obsoleted by Cloud-Config, but useful for 'create-env'
+	AZs            []AZDefinition      `yaml:"azs,omitempty"`            // v2. only in Cloud-Config
+	Networks       []NetworkDefinition `yaml:"networks,omitempty"`       // v1. Obsoleted by Cloud-Config, but useful for 'create-env'. Also in v2 in Cloud-Config
+	ResourcePools  []VMProfile         `yaml:"resource_pools,omitempty"` // v1. Obsoleted by Cloud-Config VM Types, but useful for 'create-env'
+	VMTypes        []VMType            `yaml:"vm_types,omitempty"`       // v2. only in Cloud-Config
+	VMExtensions   []VMExtension       `yaml:"vm_extensions,omitempty"`  // v2. only in Cloud-Config
+	DiskPools      []DiskProfile       `yaml:"disk_pools,omitempty"`     // v1. Obsoleted by Cloud-Config Disk Types, but useful for 'create-env'
+	DiskTypes      []DiskProfile       `yaml:"disk_types,omitempty"`     // v2. only in Cloud-Config
+	Compilation    CompilationConfig   `yaml:"compilation,omitempty"`    // v1. Obsoleted by Cloud-Config, but useful for 'create-env'. Also in v2 in Cloud-Config
 	CloudProvider  CPIConfig           `yaml:"cloud_provider,omitempty"` // Only valid with 'create-env' (a.k.a. bosh-init)
 	Variables      []Variable          `yaml:"variables,omitempty"`
 	Releases       []Release           `yaml:"releases,omitempty"`
 	Stemcells      []Stemcell          `yaml:"stemcells,omitempty"`
+	// Cloud Config
 }
 
+// InstanceGroup ...
 // Ref: https://bosh.io/docs/manifest-v2/#instance-groups
 type InstanceGroup struct {
 	Name               string         `yaml:"name,omitempty"`
@@ -44,12 +50,14 @@ type InstanceGroup struct {
 	Update             Update         `yaml:"update,omitempty"`
 }
 
+// MigratedFrom ...
 // Ref: https://bosh.io/docs/migrated-from/#schema
 type MigratedFrom struct {
 	Name string `yaml:"name,omitempty"`
 	AZ   string `yaml:"azs,omitempty"`
 }
 
+// Job ...
 type Job struct {
 	Name       string      `yaml:"name,omitempty"`
 	Release    string      `yaml:"release,omitempty"`
@@ -58,12 +66,14 @@ type Job struct {
 	Properties interface{} `yaml:"properties,omitempty"`
 }
 
+// Network ...
 type Network struct {
 	Name      string   `yaml:"name,omitempty"`
 	Default   []string `yaml:"default,omitempty,flow"`
 	StaticIPs []string `yaml:"static_ips,omitempty"`
 }
 
+// Update ...
 // Ref: https://bosh.io/docs/manifest-v2/#update
 type Update struct {
 	Serial          bool   `yaml:"serial,omitempty"`
@@ -73,6 +83,7 @@ type Update struct {
 	UpdateWatchTime string `yaml:"update_watch_time,omitempty"`
 }
 
+// Addon ...
 // Ref: https://bosh.io/docs/manifest-v2/#addons
 type Addon struct {
 	Name    string      `yaml:"name,omitempty"`
@@ -81,6 +92,13 @@ type Addon struct {
 	Exclude interface{} `yaml:"exclude,omitempty"`
 }
 
+// AZDefinition ...
+type AZDefinition struct {
+	Name            string      `yaml:"name,omitempty"`
+	CloudProperties interface{} `yaml:"cloud_properties,omitempty"`
+}
+
+// NetworkDefinition ...
 // Ref: https://bosh.io/docs/deployment-manifest/#networks
 type NetworkDefinition struct {
 	Name            string             `yaml:"name,omitempty"` // 'manual', 'dynamic', or 'vip'
@@ -90,6 +108,7 @@ type NetworkDefinition struct {
 	CloudProperties interface{}        `yaml:"cloud_properties,omitempty"`
 }
 
+// SubnetDefinition ...
 type SubnetDefinition struct {
 	Range           string      `yaml:"range,omitempty"`   // for 'manual' networks only
 	Gateway         string      `yaml:"gateway,omitempty"` // for 'manual' networks only
@@ -101,6 +120,7 @@ type SubnetDefinition struct {
 	CloudProperties interface{} `yaml:"cloud_properties,omitempty"`
 }
 
+// VMProfile ...
 // Ref: https://bosh.io/docs/deployment-manifest/#resource-pools
 type VMProfile struct {
 	Name            string                `yaml:"name,omitempty"`
@@ -111,11 +131,27 @@ type VMProfile struct {
 	Env             interface{}           `yaml:"env,omitempty"`
 }
 
+// VMType ...
+// Ref: https://bosh.io/docs/cloud-config/#vm-types
+type VMType struct {
+	Name            string      `yaml:"name,omitempty"`
+	CloudProperties interface{} `yaml:"cloud_properties,omitempty"`
+}
+
+// VMExtension ...
+// Ref: https://bosh.io/docs/cloud-config/#vm-extensions
+type VMExtension struct {
+	Name            string      `yaml:"name,omitempty"`
+	CloudProperties interface{} `yaml:"cloud_properties,omitempty"`
+}
+
+// BoshCreateEnvStemcell ...
 type BoshCreateEnvStemcell struct {
 	URL  string `yaml:"url,omitempty"`
 	SHA1 string `yaml:"sha1,omitempty"`
 }
 
+// DiskProfile ...
 // Ref: https://bosh.io/docs/deployment-manifest/#disk-pools
 type DiskProfile struct {
 	Name            string      `yaml:"name,omitempty"`
@@ -123,14 +159,20 @@ type DiskProfile struct {
 	CloudProperties interface{} `yaml:"cloud_properties,omitempty"`
 }
 
-// Ref: https://bosh.io/docs/deployment-manifest/#compilation
+// CompilationConfig ...
+// Ref. v1: https://bosh.io/docs/deployment-manifest/#compilation
 type CompilationConfig struct {
 	Workers             int         `yaml:"workers,omitempty"`
+	AZ                  string      `yaml:"az,omitempty"`
+	VMType              string      `yaml:"vm_type,omitempty"`
+	VMResources         interface{} `yaml:"vm_resources,omitempty"`
 	Network             string      `yaml:"network,omitempty"`
 	ReuseCompilationVMs bool        `yaml:"reuse_compilation_vms,omitempty"`
 	CloudProperties     interface{} `yaml:"cloud_properties,omitempty"`
+	Env                 interface{} `yaml:"env,omitempty"`
 }
 
+// CPIConfig ...
 type CPIConfig struct {
 	Template   interface{} `yaml:"template,omitempty"`
 	MBus       string      `yaml:"mbus,omitempty"`
@@ -138,6 +180,7 @@ type CPIConfig struct {
 	Properties interface{} `yaml:"properties,omitempty"`
 }
 
+// Variable ...
 // Ref: https://bosh.io/docs/manifest-v2/#variables
 type Variable struct {
 	Name    string          `yaml:"name,omitempty"`
@@ -145,6 +188,7 @@ type Variable struct {
 	Options VariableOptions `yaml:"options,omitempty"`
 }
 
+// VariableOptions ...
 type VariableOptions struct {
 	IsCA             bool     `yaml:"is_ca,omitempty"`
 	CA               string   `yaml:"ca,omitempty"`
@@ -153,6 +197,8 @@ type VariableOptions struct {
 	ExtendedKeyUsage []string `yaml:"extended_key_usage,omitempty,flow"`
 }
 
+// Release ...
+//
 // Ref. v2: https://bosh.io/docs/manifest-v2/#releases
 //
 // Ref. v1: https://bosh.io/docs/deployment-manifest/#releases
@@ -164,6 +210,7 @@ type Release struct {
 	SHA1    string `yaml:"sha1,omitempty"`
 }
 
+// Stemcell ...
 // Ref. v2: https://bosh.io/docs/manifest-v2/#stemcells
 type Stemcell struct {
 	Alias   string `yaml:"alias,omitempty"`
