@@ -125,6 +125,7 @@ Contributing
 If you modify this code, build it with:
 
 ```
+go mod download
 go build
 ```
 
