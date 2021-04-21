@@ -1,0 +1,28 @@
+---
+meta:
+  name:    humanize-manifest
+  target:  gk-plat-devs
+  url:     https://ci.gstack.io
+
+  initial_version: 2.0.0
+
+  go:
+    version: "1.16"
+    binary: humanize-manifest
+    cmd_module: .
+
+  git:
+    email:  ((git-commit-email))
+    name:   ((git-commit-name))
+
+  github:
+    owner:  cloudfoundry-community
+    repo:   humanize-manifest
+    private_key:  ((github-private-key))
+    access_token: ((github-access-token))
+
+  slack:
+    webhook:       ((slack-webhook))
+    username:      ((slack-username))
+    icon:          ((slack-icon-url))
+    channel:       "#pipelines-notifications"
