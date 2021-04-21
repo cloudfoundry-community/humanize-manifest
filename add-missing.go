@@ -69,7 +69,7 @@ func appendMissingNodes(source interface{}, dest interface{}, storeDest StoreMap
 			}
 		}
 	case map[interface{}]interface{}:
-		fmt.Errorf("unexpected type 'map[interface{}]interface{}' in YAML tree, at path '%s'.", path)
+		return fmt.Errorf("unexpected type 'map[interface{}]interface{}' in YAML tree, at path '%s'.", path)
 		// typedDest := dest.(map[interface{}]interface{})
 		// for untypedKey, srcValue := range typedSrc {
 		// 	key := untypedKey.(string)
