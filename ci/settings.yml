@@ -26,3 +26,20 @@ meta:
     username:      ((slack-username))
     icon:          ((slack-icon-url))
     channel:       "#pipelines-notifications"
+
+resources:
+
+  - name: version
+    type: semver
+    source:
+      bucket:            (( prune ))
+      region_name:       (( prune ))
+      key:               (( prune ))
+      access_key_id:     (( prune ))
+      secret_access_key: (( prune ))
+      driver:      git
+      uri:         git@github.com:gstackio/gk-pipelines-compass.git
+      branch:      master
+      file:        (( concat "versions/" meta.pipeline ))
+      private_key: ((github-private-key))
+      git_user:    "((git-commit-name)) <((git-commit-email))>"

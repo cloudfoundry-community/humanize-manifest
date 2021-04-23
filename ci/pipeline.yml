@@ -354,14 +354,14 @@ resources:
 
   - name: version
     type: semver
-    source:
-      driver:          git
-      initial_version: (( grab meta.initial_version || "0.0.1" ))
-      uri:             git@github.com:gstackio/gk-pipelines-compass.git
-      branch:          master
-      file:            versions/(( grab meta.name ))
-      private_key:     ((github-private-key))
-      git_user:        "((git-commit-name)) <((git-commit-email))>"
+    source :
+      driver:            s3
+      bucket:            (( grab meta.aws.bucket ))
+      region_name:       (( grab meta.aws.region_name ))
+      key:               version
+      access_key_id:     (( grab meta.aws.access_key ))
+      secret_access_key: (( grab meta.aws.secret_key ))
+      initial_version:   (( grab meta.initial_version || "0.0.1" ))
 
   - name: notify
     type: slack-notification
