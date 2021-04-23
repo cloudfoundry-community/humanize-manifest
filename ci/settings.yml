@@ -15,6 +15,12 @@ meta:
     email:  ((git-commit-email))
     name:   ((git-commit-name))
 
+  aws:
+    bucket:      (( grab meta.pipeline ))
+    region_name: us-east-1
+    access_key:  ((aws-access-key))
+    secret_key:  ((aws-secret-key))
+
   github:
     owner:  cloudfoundry-community
     repo:   humanize-manifest

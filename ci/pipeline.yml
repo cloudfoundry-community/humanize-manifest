@@ -32,6 +32,12 @@ meta:
     name: starkandwayne/concourse-go
     tag: (( grab meta.go.version ))
 
+  aws:
+    bucket:      (( concat meta.pipeline "-pipeline" ))
+    region_name: us-east-1
+    access_key: (( param "Please set your AWS Access Key ID" ))
+    secret_key: (( param "Please set your AWS Secret Key ID" ))
+
   github:
     uri:          (( concat "git@github.com:" meta.github.owner "/" meta.github.repo ))
     owner:        (( param "Please specify the name of the user / organization that owns the Github repository" ))
