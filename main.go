@@ -8,6 +8,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Version the version number for this program
+var Version = ""
+
 func fatalIf(err error) {
 	if err != nil {
 		fmt.Println("ERROR:", err)
@@ -37,7 +40,14 @@ func parseArguments() string {
 		os.Exit(2)
 	}
 	manifestArgIdx := 1
-	if os.Args[1] == "-d" {
+	if os.Args[1] == "-v" {
+		if Version == "" || Version == "dev" {
+			fmt.Printf("humanize-manifest (development)\n")
+		} else {
+			fmt.Printf("humanize-manifest v%s\n", Version)
+		}
+		os.Exit(0)
+	} else if os.Args[1] == "-d" {
 		fmt.Fprintf(os.Stderr, "DEBUG: activating debug mode\n")
 		debug = true
 		if len(os.Args) < 3 {
