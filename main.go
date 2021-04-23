@@ -33,6 +33,7 @@ func main() {
 
 func parseArguments() string {
 	if len(os.Args) == 0 {
+		fmt.Fprintf(os.Stderr, "ERROR: no arguments. Usage: humanize-manifest [-d] <filename>\n")
 		os.Exit(2)
 	}
 	manifestArgIdx := 1
@@ -40,12 +41,19 @@ func parseArguments() string {
 		fmt.Fprintf(os.Stderr, "DEBUG: activating debug mode\n")
 		debug = true
 		if len(os.Args) < 3 {
+			fmt.Fprintf(os.Stderr, "ERROR: too few arguments.\n")
 			os.Exit(2)
 		}
 		manifestArgIdx = 2
 	}
 	manifestPath := os.Args[manifestArgIdx]
 	if manifestPath == "" {
+		fmt.Fprintf(os.Stderr, "ERROR: empty path for file.\n")
+		os.Exit(2)
+	}
+	_, err := os.Stat(manifestPath)
+	if os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "ERROR: file does not exist: '%s'\n", manifestPath)
 		os.Exit(2)
 	}
 	return manifestPath
