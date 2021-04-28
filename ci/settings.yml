@@ -68,7 +68,9 @@ jobs:
               args:
                 - -exc
                 - |
-                  compiled-binary/humanize-manifest git/test/fixture.yml > result.yml
+                  export PATH=${PWD}/compiled-binary:${PATH}
+
+                  humanize-manifest git/test/fixture.yml > result.yml
                   diff -u git/test/expected.yml result.yml
 
 resources:
