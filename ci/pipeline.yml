@@ -91,6 +91,8 @@ jobs:
             inputs:
               - name: git
                 path: (( concat "gopath/src/" meta.go.module ))
+            caches:
+              - path: gopath
             run:
               path: (( concat "./gopath/src/" meta.go.module "/ci/scripts/test" ))
               args: []
@@ -125,6 +127,8 @@ jobs:
             inputs:
               - name: git-pull-requests
                 path: (( concat "gopath/src/" meta.go.module ))
+            caches:
+              - path: gopath
             run:
               path: (( concat "./gopath/src/" meta.go.module "/ci/scripts/test" ))
               args: []
@@ -300,6 +304,9 @@ jobs:
             outputs:
               - name: gh
               - name: pushme
+              - name: notifications
+            caches:
+              - path: gopath
             run:
               path: (( concat "./gopath/src/" meta.go.module "/ci/scripts/shipit" ))
               args: []

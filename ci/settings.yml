@@ -56,7 +56,7 @@ jobs:
                 - build
                 - -o
                 - ../compiled-binary/humanize-manifest
-        - task: test
+        - task: smoke-test
           image: build-container
           config:
             platform: linux
