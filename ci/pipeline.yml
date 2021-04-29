@@ -66,6 +66,9 @@ groups:
       - pre
       - rc
       - shipit
+      - bump-patch
+  - name: version
+    jobs:
       - major
       - minor
       - bump-patch
