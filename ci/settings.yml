@@ -97,3 +97,7 @@ resources:
       repository: golang
       tag: (( concat meta.go.version "-alpine" ))
     check_every: 24h
+
+  - name: git
+    check_every: 24h
+    webhook_token: ((concourse-webhook-token))
