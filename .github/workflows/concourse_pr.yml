@@ -1,5 +1,5 @@
 name: Trigger Concourse pull requests
-on: [ pull_request ]
+on: [ push, pull_request ]
 jobs:
   trigger-resource-check:
     runs-on: ubuntu-latest
