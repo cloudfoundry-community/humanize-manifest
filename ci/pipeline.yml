@@ -118,7 +118,7 @@ jobs:
         - put: git-pull-requests
           params:
             path: git-pull-requests
-            status: pending
+            status: PENDING
         - task: test
           image: image
           config:
@@ -137,12 +137,12 @@ jobs:
             put: git-pull-requests
             params:
               path: git-pull-requests
-              status: success
+              status: SUCCESS
           on_failure:
             put: git-pull-requests
             params:
               path: git-pull-requests
-              status: failure
+              status: FAILURE
         - task: pr-success-message
           image: image
           config:
@@ -347,7 +347,7 @@ resource_types:
   - name: pull-request
     type: docker-image
     source:
-      repository: jtarchie/pr
+      repository: teliaoss/github-pr-resource
 
 resources:
   - name: image
@@ -392,6 +392,5 @@ resources:
     type: pull-request
     source:
       access_token: (( grab meta.github.access_token ))
-      private_key:  (( grab meta.github.private_key ))
-      repo:         (( concat meta.github.owner "/" meta.github.repo ))
-      base:         (( grab meta.github.branch ))
+      repository:   (( concat meta.github.owner "/" meta.github.repo ))
+      base_branch:  (( grab meta.github.branch ))
