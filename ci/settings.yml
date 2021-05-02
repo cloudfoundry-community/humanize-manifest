@@ -15,6 +15,11 @@ meta:
     email:  ((git-commit-email))
     name:   ((git-commit-name))
 
+  image:
+    registry:
+      username: ((dockerhub-username))
+      password: ((dockerhub-password))
+
   aws:
     bucket:      (( grab meta.pipeline ))
     region_name: us-east-1
