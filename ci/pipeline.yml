@@ -218,6 +218,7 @@ jobs:
         - in_parallel:
             - { get: git,     trigger: true,  passed: [pre] }
             - { get: version, trigger: false, params: {pre: rc} }
+            - { get: image,                   passed: [pre] }
         - put: version
           params: {file: version/number}
         on_failure:
