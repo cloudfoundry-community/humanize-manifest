@@ -1,8 +1,10 @@
 ---
 meta:
   name:    humanize-manifest
-  target:  gk-plat-devs
+  release: (( concat meta.name " CLI" ))
+  target:  (( grab meta.team ))
   url:     https://ci.gstack.io
+  team:    gk-plat-devs
 
   initial_version: 2.0.0
 
