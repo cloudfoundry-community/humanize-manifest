@@ -1,8 +1,5 @@
 module github.com/cloudfoundry-community/humanize-manifest
 
-go 1.16
+go 1.21
 
-require (
-	github.com/mitchellh/gox v1.0.1 // indirect
-	gopkg.in/yaml.v2 v2.4.0
-)
+require gopkg.in/yaml.v2 v2.4.0
