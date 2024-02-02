@@ -210,6 +210,25 @@ jobs:
         icon_url: (( grab meta.slack.icon ))
         text_file: messages/notif-body
 
+  - name: shipit
+    plan:
+      - (( inline ))
+      - in_parallel:
+          - (( merge on get ))
+          - { get: image, resource: golang-alpine, passed: [ test ] }
+      - task: release
+        config:
+          run:
+            path: sh
+            args:
+              - -ec
+              - |
+                apk --no-progress add bash git
+                export PATH=${PWD}/gopath/bin:${PATH}
+                bash "${SHIPIT_SCRIPT}"
+          params:
+            SHIPIT_SCRIPT: (( concat "./gopath/src/" meta.go.module "/ci/scripts/shipit" ))
+
 resources:
 
   - name: image
