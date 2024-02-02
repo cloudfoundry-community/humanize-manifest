@@ -100,6 +100,26 @@ jobs:
                 humanize-manifest git/test/fixture.yml > result.yml
                 diff -u git/test/expected.yml result.yml
 
+  - name: test-pr
+    plan:
+      - (( inline ))
+      - in_parallel:
+          - (( merge on get ))
+          - get: golang-alpine
+            trigger: true
+            passed: [ bump-deps ]
+
+      - {} # put: git-pull-requests
+
+      # We replace the 'task: text' by a block of 2 tasks
+      - task:   (( prune ))
+        image:  (( prune ))
+        config: (( prune ))
+        do:
+          - *compile_task
+
+          - *smpoke_test_task
+
   - name: bump-deps
     public: true
     serial: true
