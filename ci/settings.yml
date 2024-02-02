@@ -18,13 +18,20 @@ meta:
     name:   ((git-commit-name))
 
   image:
+    name: (( concat meta.private-registry.host "/gstack/gk-ops" ))
+    tag:  latest
     registry:
-      username: ((dockerhub-username))
-      password: ((dockerhub-password))
+      username: (( grab meta.private-registry.username ))
+      password: (( grab meta.private-registry.password ))
+
+  private-registry:
+    host:       harbor.ci.gstack.io
+    username:   ((private-registry-username))
+    password:   ((private-registry-password))
 
   aws:
     bucket:      (( grab meta.pipeline ))
-    region_name: us-east-1
+    region_name: eu-west-3
     access_key:  ((aws-access-key))
     secret_key:  ((aws-secret-key))
 
@@ -38,49 +45,55 @@ meta:
     webhook:       ((slack-webhook))
     username:      ((slack-username))
     icon:          ((slack-icon-url))
-    channel:       "#pipelines-notifications"
+    channel:       "#oss-pipelines-notifications"
 
 jobs:
   - name: test
     plan:
       - (( inline ))
-      - do:
-        - (( append ))
-        - get: build-container
-          trigger: true
-        - task: compile
-          image: build-container
-          config:
-            platform: linux
-            inputs:
-              - name: git
-            outputs:
-              - name: compiled-binary
-            run:
-              dir: git
-              path: go
-              args:
-                - build
-                - -o
-                - ../compiled-binary/humanize-manifest
-        - task: smoke-test
-          image: build-container
-          config:
-            platform: linux
-            inputs:
-              - name: compiled-binary
-              - name: git
-            run:
-              path: sh
-              args:
-                - -exc
-                - |
-                  export PATH=${PWD}/compiled-binary:${PATH}
+      - in_parallel:
+          - (( append ))
+          - get: build-container
+            trigger: true
+      - (( prune ))
+      - task: compile
+        image: build-container
+        config:
+          platform: linux
+          inputs:
+            - name: git
+          outputs:
+            - name: compiled-binary
+          run:
+            dir: git
+            path: go
+            args:
+              - build
+              - -o
+              - ../compiled-binary/humanize-manifest
+      - task: smoke-test
+        image: build-container
+        config:
+          platform: linux
+          inputs:
+            - name: compiled-binary
+            - name: git
+          run:
+            path: sh
+            args:
+              - -exc
+              - |
+                export PATH=${PWD}/compiled-binary:${PATH}
 
-                  humanize-manifest git/test/fixture.yml > result.yml
-                  diff -u git/test/expected.yml result.yml
+                humanize-manifest git/test/fixture.yml > result.yml
+                diff -u git/test/expected.yml result.yml
 
 resources:
+
+  - name: image
+    source:
+      tag:               (( prune ))
+      semver_constraint: "< 1970" # Avoid YYYYMMDD tags like '20231219'
 
   - name: version
     source:
