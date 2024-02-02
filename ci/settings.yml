@@ -61,9 +61,11 @@ jobs:
           - get: golang-alpine
             trigger: true
             passed: [ bump-deps ]
+
+      # NOTICE: we replace all further steps
       - # task: test
         (( prune ))
-      # NOTICE: we replace all tasks
+
       - &compile_task
         task: compile
         image: golang-alpine
@@ -80,6 +82,7 @@ jobs:
               - build
               - -o
               - ../compiled-binary/humanize-manifest
+
       - &smpoke_test_task
         task: smoke-test
         image: image
