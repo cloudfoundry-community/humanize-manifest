@@ -242,7 +242,7 @@ jobs:
             args:
               - -ec
               - |
-                apk --no-progress add bash git
+                apk --no-progress add  bash  git  gcc  musl-dev
                 export PATH=${PWD}/gopath/bin:${PATH}
                 bash "${SHIPIT_SCRIPT}"
           params:
