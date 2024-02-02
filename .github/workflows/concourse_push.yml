@@ -34,4 +34,4 @@ jobs:
           # The resource for which a check is to be triggered
           concourse-resource: git
           # The secret value used for the 'webhook_token' property of the Concourse resource
-          concourse-webhook-token: ${{ secrets.CONCOURSE_WEBHOOK_TOKEN }}
+          concourse-webhook-token: ${{ secrets.GK_CONCOURSE_WEBHOOK_TOKEN }}
