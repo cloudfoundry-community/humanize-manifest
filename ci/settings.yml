@@ -47,17 +47,26 @@ meta:
     icon:          ((slack-icon-url))
     channel:       "#oss-pipelines-notifications"
 
+groups:
+  - name: bump
+    jobs:
+      - bump-deps
+
 jobs:
   - name: test
     plan:
       - (( inline ))
       - in_parallel:
-          - (( append ))
-          - get: build-container
+          - (( merge on get ))
+          - get: golang-alpine
             trigger: true
-      - (( prune ))
-      - task: compile
-        image: build-container
+            passed: [ bump-deps ]
+      - # task: test
+        (( prune ))
+      # NOTICE: we replace all tasks
+      - &compile_task
+        task: compile
+        image: golang-alpine
         config:
           platform: linux
           inputs:
@@ -71,15 +80,16 @@ jobs:
               - build
               - -o
               - ../compiled-binary/humanize-manifest
-      - task: smoke-test
-        image: build-container
+      - &smpoke_test_task
+        task: smoke-test
+        image: image
         config:
           platform: linux
           inputs:
             - name: compiled-binary
             - name: git
           run:
-            path: sh
+            path: bash
             args:
               - -exc
               - |
@@ -87,6 +97,115 @@ jobs:
 
                 humanize-manifest git/test/fixture.yml > result.yml
                 diff -u git/test/expected.yml result.yml
+
+  - name: bump-deps
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - { get: weekly, trigger: true }
+          - { get: git }
+          - { get: gk-automation }
+          - { get: golang-alpine }
+          - { get: image }
+
+      - task: bump-golang-deps
+        image: golang-alpine
+        config:
+          platform: linux
+          inputs:  [ { name: git, path: repo } ]
+          outputs:
+            - name: repo-bumped
+            - name: golang-info
+          run:
+            path: sh
+            args:
+            - -ec
+            - |
+              find "repo" -mindepth 1 -maxdepth 1 -print0 \
+                  | xargs -0 -I{} cp -a {} "repo-bumped"
+              cd "repo-bumped" || exit 115
+
+              awk '/^go /{print $2}' go.mod > ../golang-info/previous-version
+              (
+                  set -x
+                  go_version=$(
+                      go version \
+                      | awk '{sub(/go/,"",$3); sub(/\.[[:digit:]]+$/,"",$3); print $3}'
+                  )
+                  sed -i -Ee "s/^go [[:digit:].]+\$/go ${go_version}/" go.mod
+                  go get -t -u ./...
+                  go mod tidy
+
+                  echo "${go_version}" > ../golang-info/version
+              )
+
+      - <<: *compile_task
+        input_mapping: { git: repo-bumped }
+
+      - *smpoke_test_task
+
+      - task: generate-messages
+        image: image
+        config:
+          platform: linux
+          inputs:  [ name: golang-info ]
+          outputs: [ name: messages ]
+          run:
+            path: bash
+            args:
+            - -c
+            - |
+              set -ueo pipefail
+              go_prev_ver=$(< golang-info/previous-version)
+              go_curr_ver=$(< golang-info/version)
+
+              version_details="${go_curr_ver}"
+              if [[ ${go_curr_ver} != ${go_prev_ver} ]]; then
+                  version_details="from ${go_prev_ver} to ${go_curr_ver} and its"
+              fi
+              echo "Update Golang ${version_details} dependencies" \
+                  > messages/commit-message
+
+              echo "${PIPELINE_NAME}: successfully bumped Golang ${version_details} dependencies," \
+                "with passing tests! :tada:" \
+                "<${PIPELINE_URL}|Ship it when ready!> ${SUCCESS_MOJI}" \
+                > messages/notif-body
+          params:
+            SUCCESS_MOJI:  (( grab meta.slack.success_moji ))
+            PIPELINE_URL:  (( grab meta.slack.pipeline_url ))
+            PIPELINE_NAME: (( grab meta.pipeline ))
+
+      - task: git-commit
+        image: image
+        file: gk-automation/tasks/git/commit.yml
+        input_mapping:
+          repo:        repo-bumped
+          commit-info: messages
+        params:
+          GIT_COMMIT_NAME:    (( grab meta.git.name ))
+          GIT_COMMIT_EMAIL:   (( grab meta.git.email ))
+          GIT_DIFF_OPTS:      --color-words
+
+      - put: git
+        params:
+          repository: repo-committed
+          rebase:     true
+
+    on_failure:
+      put: notify
+      params:
+        channel:  (( grab meta.slack.channel ))
+        username: (( grab meta.slack.username ))
+        icon_url: (( grab meta.slack.icon ))
+        text:     (( grab meta.slack.fail_text ))
+    on_success:
+      put: notify
+      params:
+        channel:  (( grab meta.slack.channel ))
+        username: (( grab meta.slack.username ))
+        icon_url: (( grab meta.slack.icon ))
+        text_file: messages/notif-body
 
 resources:
 
@@ -109,13 +228,13 @@ resources:
       private_key: ((github-private-key))
       git_user:    "((git-commit-name)) <((git-commit-email))>"
 
-  - name: build-container
-    type: docker-image
+  - name: golang-alpine
+    type: registry-image
     icon: docker
+    check_every: 24h
     source:
       repository: golang
-      tag: (( concat meta.go.version "-alpine" ))
-    check_every: 24h
+      variant:    alpine
 
   - name: git
     check_every: 24h
@@ -124,3 +243,21 @@ resources:
   - name: git-pull-requests
     check_every: 24h
     webhook_token: ((concourse-webhook-token))
+
+  - name: weekly
+    type: time
+    icon: alarm
+    source:
+      location: Europe/Paris
+      start:    "3:00"
+      stop:     "4:30"
+      days:     [ Saturday ]
+
+  - name: gk-automation
+    type: git
+    icon: github
+    check_every: 24h
+    source:
+      uri:         git@github.com:gstackio/gk-automation.git
+      branch:      master
+      private_key: (( grab meta.github.private_key ))
