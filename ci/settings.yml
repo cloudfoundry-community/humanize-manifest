@@ -129,6 +129,7 @@ jobs:
           - { get: git }
           - { get: gk-automation }
           - { get: golang-alpine }
+          - { get: syft }
           - { get: image }
 
       - task: bump-golang-deps
@@ -161,6 +162,23 @@ jobs:
 
                   echo "${go_version}" > ../golang-info/version
               )
+
+      - task: generate-sboms
+        image: syft
+        config:
+          platform: linux
+          inputs:  [ { name: repo-bumped, path: repo } ]
+          outputs: [ { name: sboms } ]
+          run:
+            dir: repo
+            path: /syft
+            args:
+              - .
+              - --verbose
+              - --select-catalogers=go
+              -      --output=syft-json=../sboms/sbom.syft.json
+              - --output=cyclonedx-json=../sboms/sbom.cyclonedx.json
+              -      --output=spdx-json=../sboms/sbom.spdx.json
 
       - <<: *compile_task
         input_mapping: { git: repo-bumped }
@@ -302,3 +320,9 @@ resources:
       uri:         git@github.com:gstackio/gk-automation.git
       branch:      master
       private_key: (( grab meta.github.private_key ))
+
+  - name: syft
+    type: registry-image
+    source:
+      repository: anchore/syft
+      variant:    ""
